@@ -1,7 +1,10 @@
+// components/App.jsx
 import React, { useState } from "react";
+import { Link } from "react-router-dom"; // Для маршрутизации
+import Navbar from "./components/Navbar";
 import Chat from "./Chat";
-import Navbar from "./components/Navbar"; // импорт
 import SearchWithFilters from "./SearchWithFilters";
+import ProtectedData from './components/ProtectedData'; // Импорт компонента
 
 export default function App() {
   const [started, setStarted] = useState(false);
@@ -34,6 +37,13 @@ export default function App() {
               >
                 Начать
               </button>
+
+              {/* Кнопка для перехода на страницу авторизации */}
+              <Link to="/login">
+                <button className="mt-4 bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
+                  Войти
+                </button>
+              </Link>
             </div>
 
             <img

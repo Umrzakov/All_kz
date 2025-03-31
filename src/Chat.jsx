@@ -13,29 +13,33 @@ export default function Chat() {
   }, [messages]);
 
   const sendMessage = async () => {
-    if (!input.trim()) return;
+  if (!input.trim()) {
+    alert("Пожалуйста, введите текст.");
+    return;
+  }
 
-    const userMessage = { role: "user", text: input };
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
-    setIsTyping(true);
+  const userMessage = { role: "user", text: input };
+  setMessages((prev) => [...prev, userMessage]);
+  setInput("");
+  setIsTyping(true);
 
-    try {
-      const res = await fetch("http://localhost:3001/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input }),
-      });
+  try {
+    const res = await fetch("http://localhost:3001/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: input }),  // Убедитесь, что 'input' не пустое
+    });
 
-      const data = await res.json();
-      setMessages((prev) => [...prev, { role: "ai", text: data.reply }]);
-    } catch (error) {
-      console.error(error);
-      setMessages((prev) => [...prev, { role: "ai", text: "Произошла ошибка 😥" }]);
-    } finally {
-      setIsTyping(false);
-    }
-  };
+    const data = await res.json();
+    setMessages((prev) => [...prev, { role: "ai", text: data.reply }]);
+  } catch (error) {
+    console.error("Ошибка:", error);
+    setMessages((prev) => [...prev, { role: "ai", text: "Произошла ошибка 😥" }]);
+  } finally {
+    setIsTyping(false);
+  }
+};
+
 
   const handleVoiceInput = () => {
     const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
@@ -63,9 +67,7 @@ export default function Chat() {
           <div
             key={idx}
             className={`p-2 rounded max-w-[80%] ${
-              msg.role === "user"
-                ? "bg-blue-100 text-right ml-auto"
-                : "bg-gray-100 text-left"
+              msg.role === "user" ? "bg-blue-100 text-right ml-auto" : "bg-gray-100 text-left"
             }`}
           >
             {msg.text}
@@ -93,6 +95,7 @@ export default function Chat() {
         <button
           onClick={sendMessage}
           className="bg-blue-600 text-white px-4 rounded hover:bg-blue-700"
+          disabled={!input.trim()}  // Блокируем кнопку "Отправить", если нет текста
         >
           Отправить
         </button>
