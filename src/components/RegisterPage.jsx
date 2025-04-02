@@ -7,15 +7,24 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleRegister = async (e) => {
-  e.preventDefault();
+const handleRegister = async () => {
   try {
-    await axios.post("http://localhost:3001/api/auth/register", { email, password });
-    alert("Регистрация успешна, теперь вы можете войти.");
-    navigate("/login");
-  } catch (err) {
-    alert("Ошибка регистрации.");
-    console.error(err);
+    const res = await fetch("http://localhost:3001/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      // Успешная регистрация, редирект на страницу входа или авторизация
+      console.log("Регистрация прошла успешно:", data);
+    } else {
+      alert(data.message); // Выводим сообщение об ошибке
+    }
+  } catch (error) {
+    console.error("Ошибка при регистрации:", error);
   }
 };
 

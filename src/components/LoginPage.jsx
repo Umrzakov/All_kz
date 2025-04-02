@@ -1,36 +1,60 @@
 import React, { useState } from "react";
 import { GoogleLogin } from "@react-oauth/google";
-import { jwtDecode } from "jwt-decode";
-import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
+  // Функция для обработки логина через email и пароль
   const handleEmailLogin = async (e) => {
-    e.preventDefault();
+    e.preventDefault();  // Предотвращаем перезагрузку страницы
+
     try {
-      const res = await axios.post("/api/auth/login", { email, password });
-      localStorage.setItem("token", res.data.token);
-      navigate("/");
-    } catch (err) {
-      alert("Ошибка входа. Проверьте email и пароль.");
-      console.error(err);
+      const res = await fetch("http://localhost:3001/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        localStorage.setItem("jwtToken", data.token); // Сохраняем токен
+        // Редирект на главную страницу или другую
+        navigate("/");
+        console.log("Авторизация прошла успешно");
+      } else {
+        alert(data.message); // Выводим сообщение об ошибке
+      }
+    } catch (error) {
+      console.error("Ошибка при авторизации:", error);
     }
   };
 
-  const handleGoogleLogin = async (credentialResponse) => {
-    const token = credentialResponse.credential;
-    const user = jwtDecode(token);
-    try {
-      const res = await axios.post("/api/auth/google", { token });
-      localStorage.setItem("token", res.data.token);
-      navigate("/");
-    } catch (err) {
-      console.error(err);
-      alert("Ошибка авторизации Google.");
+  // Функция для обработки логина через Google
+  const handleGoogleLogin = async (response) => {
+    if (response.credential) {
+      try {
+        const res = await fetch("http://localhost:3001/api/auth/google", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: response.credential }),
+        });
+
+        const data = await res.json();
+
+        if (data.token) {
+          localStorage.setItem("jwtToken", data.token); // Сохраняем токен
+          navigate("/"); // Перенаправление на главную страницу
+          console.log("Авторизация через Google прошла успешно");
+        }
+      } catch (error) {
+        console.error("Ошибка авторизации через Google:", error);
+        alert("Ошибка авторизации через Google");
+      }
     }
   };
 
@@ -67,7 +91,7 @@ export default function LoginPage() {
 
       <GoogleLogin
         onSuccess={handleGoogleLogin}
-        onError={() => alert("Ошибка авторизации Google")}
+        onError={() => alert("Ошибка авторизации через Google")}
       />
 
       <p className="mt-4 text-center">

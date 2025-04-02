@@ -1,3 +1,4 @@
+
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
@@ -5,6 +6,8 @@ import { OAuth2Client } from 'google-auth-library';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import OpenAI from 'openai'; // Подключаем OpenAI
+import bcrypt from 'bcrypt';  // Импорт bcrypt
+import helmet from 'helmet';  // Импорт helmet для безопасности
 
 dotenv.config();
 
@@ -15,9 +18,21 @@ const port = process.env.PORT || 3001;
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const oauth2Client = new OAuth2Client(CLIENT_ID);
 
+app.use(helmet());  // Подключаем Helmet для улучшенной безопасности
 // Middleware для обработки JSON и CORS
 app.use(express.json());
 app.use(cors());
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "https://apis.google.com", "https://accounts.google.com"],
+      connectSrc: ["'self'", "https://accounts.google.com"],
+      imgSrc: ["'self'", "https://example.com"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+    },
+  })
+);
 
 // Подключение к MongoDB
 mongoose.connect(process.env.MONGO_URI)
@@ -88,8 +103,9 @@ app.post('/api/auth/register', async (req, res) => {
     if (existingUser) {
       return res.status(400).json({ message: 'Пользователь уже существует' });
     }
-
-    const user = new User({ email, password }); // пароль храни зашифрованным в реальном проекте
+    const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds); // Хешируем пароль
+    const user = new User({ email, password: hashedPassword  }); // пароль храни зашифрованным в реальном проекте
     await user.save();
 
     res.status(201).json({ message: 'Пользователь создан' });
@@ -106,8 +122,14 @@ app.post('/api/auth/login', async (req, res) => {
 
   try {
     const user = await User.findOne({ email });
-    if (!user || user.password !== password) { // ⚠️ В реальном проекте используй bcrypt
+    if (!user) { // ⚠️ В реальном проекте используй bcrypt
       return res.status(401).json({ message: 'Неверные данные входа' });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password); // Сравниваем пароль с хешированным
+
+    if (!isMatch) {
+      return res.status(401).json({ message: "Неверные данные входа" });
     }
 
     const jwtToken = jwt.sign(
