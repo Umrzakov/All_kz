@@ -1,0 +1,50 @@
+[
+  {
+    "name": "Смартфон Samsung Galaxy S21",
+    "category": "Электроника",
+    "price": 79999,
+    "image": "./images/zara.jpg"
+  },
+  {
+    "name": "Ноутбук Apple MacBook Pro 13",
+    "category": "Техника",
+    "price": 129999,
+    "image": "https://example.com/macbook-pro-13.jpg"
+  },
+  {
+    "name": "Наушники Sony WH-1000XM4",
+    "category": "Аудио",
+    "price": 24999,
+    "image": "https://example.com/sony-wh-1000xm4.jpg"
+  },
+  {
+    "name": "Телевизор LG OLED55CX",
+    "category": "Техника",
+    "price": 159999,
+    "image": "https://example.com/lg-oled55cx.jpg"
+  },
+  {
+    "name": "Смартфон iPhone 13 Pro",
+    "category": "Электроника",
+    "price": 109999,
+    "image": "https://example.com/iphone-13-pro.jpg"
+  },
+  {
+    "name": "Умные часы Samsung Galaxy Watch 4",
+    "category": "Аксессуары",
+    "price": 21999,
+    "image": "https://example.com/galaxy-watch-4.jpg"
+  },
+  {
+    "name": "Игровая приставка Sony PlayStation 5",
+    "category": "Игры",
+    "price": 49999,
+    "image": "https://example.com/playstation-5.jpg"
+  },
+  {
+    "name": "Планшет Apple iPad Pro 11",
+    "category": "Техника",
+    "price": 74999,
+    "image": "https://example.com/ipad-pro-11.jpg"
+  }
+]

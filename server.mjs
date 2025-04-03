@@ -8,6 +8,7 @@ import dotenv from 'dotenv';
 import OpenAI from 'openai'; // Подключаем OpenAI
 import bcrypt from 'bcrypt';  // Импорт bcrypt
 import helmet from 'helmet';  // Импорт helmet для безопасности
+import Product from "./src/data/products.js";
 
 dotenv.config();
 
@@ -35,9 +36,11 @@ app.use(
 );
 
 // Подключение к MongoDB
+// Подключаемся к MongoDB
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB подключена'))
   .catch((err) => console.error('Ошибка MongoDB:', err));
+
 
 // Модель пользователя
 const userSchema = new mongoose.Schema({
@@ -61,6 +64,26 @@ const verifyToken = async (token) => {
 // Инициализация OpenAI API
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY, // Получите ключ API на платформе OpenAI
+});
+
+// Роут для получения всех товаров
+app.get('/api/products', async (req, res) => {
+  const { query, category } = req.query; // Получаем параметры фильтрации
+
+  try {
+    const filter = {};
+    if (query) {
+      filter.name = { $regex: query, $options: 'i' }; // Фильтруем по названию
+    }
+    if (category) {
+      filter.category = category; // Фильтруем по категории
+    }
+
+    const products = await Product.find(filter); // Находим продукты, которые соответствуют фильтрам
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: "Ошибка загрузки товаров" });
+  }
 });
 
 // ✅ Роут авторизации через Google
@@ -164,6 +187,25 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
+// Добавление нового товара
+app.post("/api/products/:id", async (req, res) => {
+  const { name, description, price, category, image } = req.body;
+
+  const newProduct = new Product({
+    name,
+    description,
+    price,
+    category,
+    image,
+  });
+
+  try {
+    await newProduct.save();
+    res.status(201).json({ message: "Товар добавлен" });
+  } catch (err) {
+    res.status(500).json({ message: "Ошибка при добавлении товара" });
+  }
+});
 
 
 // Запуск сервера

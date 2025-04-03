@@ -9,19 +9,25 @@ export default function Navbar() {
   }, []);
 
   return (
-      <nav className="bg-white shadow-sm py-4 px-6 flex justify-between items-center">
-
-          <header className="w-full shadow p-4 flex items-center justify-between">
-              <nav className="space-x-6">
-                  <a href="#" className="hover:text-blue-500">Каталог</a>
-                  <a href="#" className="hover:text-blue-500">О нас</a>
-                  <a href="#" className="hover:text-blue-500">Контакты</a>
-                  <a> </a>
-              </nav>
-              <a href="/cart" className="hover:text-blue-500">
+    <nav
+      className="bg-white shadow-sm py-4 px-6 flex justify-between items-center"
+      style={{
+        backgroundImage: `url(/images/.png)`, // Путь к изображению
+        backgroundSize: "cover", // Растягиваем изображение на весь контейнер
+        backgroundPosition: "center", // Центрируем изображение
+      }}
+    >
+      <header className="w-full shadow p-4 flex items-center justify-between">
+        <nav className="space-x-6">
+          <a href="#" className="hover:text-blue-500">Каталог</a>
+          <a href="#" className="hover:text-blue-500">О нас</a>
+          <a href="#" className="hover:text-blue-500">Контакты</a>
+          <a> </a>
+        </nav>
+        <a href="/cart" className="hover:text-blue-500">
           🛒 Корзина {count > 0 && `(${count})`}
         </a>
-          </header>
-      </nav>
-);
+      </header>
+    </nav>
+  );
 }

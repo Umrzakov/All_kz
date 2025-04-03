@@ -1,4 +1,4 @@
-// components/App.jsx
+//App.jsx
 import React, { useState } from "react";
 import { Link } from "react-router-dom"; // Для маршрутизации
 import Navbar from "./components/Navbar";

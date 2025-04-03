@@ -6,6 +6,7 @@ import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
+import CatalogPage from "./pages/CatalogPage";
 
 function Root() {
   return (
@@ -15,7 +16,8 @@ function Root() {
       <Route path="/product/:id" element={<ProductPage />} />
       <Route path="/cart" element={<CartPage />} />
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
+            <Route path="/catalog" element={<CatalogPage />} />
+        <Route path="/register" element={<RegisterPage />} />
     </Routes>
   );
 }

@@ -6,40 +6,43 @@ export default function Chat() {
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const bottomRef = useRef(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const chatContainerRef = useRef(null); // Реф для контейнера чата
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Прокручиваем контейнер чата вниз при обновлении сообщений
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
   }, [messages]);
 
   const sendMessage = async () => {
-  if (!input.trim()) {
-    alert("Пожалуйста, введите текст.");
-    return;
-  }
+    if (!input.trim()) {
+      alert("Пожалуйста, введите текст.");
+      return;
+    }
 
-  const userMessage = { role: "user", text: input };
-  setMessages((prev) => [...prev, userMessage]);
-  setInput("");
-  setIsTyping(true);
+    const userMessage = { role: "user", text: input };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setIsTyping(true);
 
-  try {
-    const res = await fetch("http://localhost:3001/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: input }),  // Убедитесь, что 'input' не пустое
-    });
+    try {
+      const res = await fetch("http://localhost:3001/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: input }),
+      });
 
-    const data = await res.json();
-    setMessages((prev) => [...prev, { role: "ai", text: data.reply }]);
-  } catch (error) {
-    console.error("Ошибка:", error);
-    setMessages((prev) => [...prev, { role: "ai", text: "Произошла ошибка 😥" }]);
-  } finally {
-    setIsTyping(false);
-  }
-};
-
+      const data = await res.json();
+      setMessages((prev) => [...prev, { role: "ai", text: data.reply }]);
+    } catch (error) {
+      console.error("Ошибка:", error);
+      setMessages((prev) => [...prev, { role: "ai", text: "Произошла ошибка 😥" }]);
+    } finally {
+      setIsTyping(false);
+    }
+  };
 
   const handleVoiceInput = () => {
     const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
@@ -48,7 +51,7 @@ export default function Chat() {
 
     recognition.onresult = (event) => {
       let voiceText = event.results[0][0].transcript.trim();
-      voiceText = voiceText.replace(/[.,!?]+$/, ""); // убираем точку в конце
+      voiceText = voiceText.replace(/[.,!?]+$/, "");
       setInput(voiceText);
       setTimeout(() => sendMessage(), 300); // немного подождать перед отправкой
     };
@@ -59,10 +62,27 @@ export default function Chat() {
     };
   };
 
+  const toggleCollapse = () => {
+    setIsCollapsed((prev) => !prev);
+  };
+
   return (
     <div className="border rounded-lg p-4 shadow-sm bg-white h-[500px] flex flex-col">
       <h2 className="text-xl font-semibold mb-2">💬 AI чат</h2>
-      <div className="flex-1 overflow-auto space-y-2 mb-2">
+
+      <button
+        onClick={toggleCollapse}
+        className="self-end mb-4 text-sm text-blue-500 hover:underline"
+      >
+        {isCollapsed ? "Развернуть чат" : "Свернуть чат"}
+      </button>
+
+      <div
+        ref={chatContainerRef} // Реф для прокрутки чата
+        className={`flex-1 overflow-auto space-y-2 mb-2 transition-all duration-300 ease-in-out ${
+          isCollapsed ? "max-h-0 overflow-hidden" : "max-h-[calc(100%-150px)]"
+        }`}
+      >
         {messages.map((msg, idx) => (
           <div
             key={idx}
@@ -76,8 +96,8 @@ export default function Chat() {
         {isTyping && (
           <div className="text-gray-400 italic text-sm">AI печатает...</div>
         )}
-        <div ref={bottomRef} />
       </div>
+
       <div className="flex space-x-1">
         <input
           value={input}
